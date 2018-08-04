@@ -1,0 +1,245 @@
+/* 
+2066一个人的旅行 
+输入： 
+输入数据有多组，每组的第一行是三个整数T，S和D，表示有T条路，和草儿家相邻的城市的有S个，草儿想去的地方有D个； 
+接着有T行，每行有三个整数a，b，time,表示a,b城市之间的车程是time小时；(1=<(a,b)<=1000;a,b 之间可能有多条路) 
+接着的第T+1行有S个数，表示和草儿家相连的城市； 
+接着的第T+2行有D个数，表示草儿想去地方。 
+输出： 
+输出草儿能去某个喜欢的城市的最短时间。 
+输入： 
+6 2 3 
+1 3 5 
+1 4 7 
+2 8 12 
+3 8 4 
+4 9 12 
+9 10 2 
+1 2 
+8 9 10 
+输出： 
+9 
+需要注意，路径的相互可达，即这个图中的路径是没有方向的。 
+*/
+#include<cstdio>
+#include<cstring>
+const int NMAX = 1001;
+const int INFINITY = 0xffffff;
+int Dist[NMAX][NMAX];
+int T,S,D;
+int dest[NMAX];
+int dist[NMAX];
+int ans;
+void dijikstra(int src)
+{
+    bool visit[NMAX];
+
+    int min,tempv;
+    int i,j;
+    for(i=0;i<NMAX;i++)
+    {
+        dist[i] = Dist[src][i];
+        visit[i] = false;
+    }
+    visit[src] = true;
+    dist[src] = 0;
+    for(i=1;i<NMAX;i++)
+    {
+        min = INFINITY;
+        tempv = src;
+        for(j=1;j<NMAX;j++)
+        {
+            if(!visit[j] && min>dist[j])
+            {
+                min = dist[j];
+                tempv = j;
+            }
+        }
+        //if(tempv == src)
+        //  break;
+        visit[tempv] = true;
+        for(j=1;j<NMAX;j++)
+        {
+            if(!visit[j] && min<INFINITY && Dist[tempv][j]<INFINITY && min+Dist[tempv][j]<dist[j])
+            {
+                dist[j] = min+Dist[tempv][j];
+            }
+
+        }
+    }
+    ans = dist[dest[0]];
+    for(i=1;i<D;i++)
+    {
+        if(ans>dist[dest[i]])
+            ans = dist[dest[i]];
+    }
+    printf("%d\n",ans);
+
+}
+
+int main()
+{
+    int ans;
+    while(scanf("%d%d%d",&T,&S,&D)!=EOF)
+    {
+
+        int a,b,time;
+        int i,j;
+        int nearcity[NMAX];
+
+        for(i=0;i<NMAX;i++)
+        {
+            nearcity[i] = INFINITY;
+            dest[i] = INFINITY;
+            for(j=0;j<NMAX;j++)
+            {
+                Dist[i][j] = Dist[j][i] = INFINITY;
+            }
+        }
+
+        for(i=0;i<T;i++)
+        {
+            scanf("%d%d%d",&a,&b,&time);
+
+            if(Dist[a][b]>time)
+                Dist[a][b] = Dist[b][a]= time;  //主要是这里路是相互的，a能到b，b也能到a。
+        }
+        for(i=0;i<S;i++)
+        {
+            scanf("%d",&nearcity[i]);
+            Dist[0][nearcity[i]] = 0;
+        }
+        for(i=0;i<D;i++)
+        {
+            scanf("%d",&dest[i]);
+        }
+        dijikstra(0);
+
+
+    }
+
+    return 0;
+}
+
+/**************************************************************************************************************/
+
+差分约束系统：如果一个系统由n个变量和m个约束条件组成，其中每个约束条件形如 xj - xi<= bk ( i , j ∈ [1，n]，k ∈ [1，m])，则称其为差分约束系统。 
+例如如下的约束条件： 
+X1 - X2 <= 0 X1 - X5 <= -1 
+X2 - X5 <= 1 X3 - X1 <= 5 
+X4 - X1 <= 4 X4 - X3 <= -1 
+X5 - X3 <= -3 X5 - X4 <= -3 
+全都是两个未知数的差小于等于某个常数（大于等于也可以，因为左右乘以-1就可以化成小于等于）。这样的不等式组就称作差分约束系统。 
+差分约束系统求解过程： 
+1.新建一个图，N个变量看作N个顶点，M个约束条件作为M条边。每个顶点Vi分别对于一个未知量，每个有向边对应两个未知量的不等式。 
+2.为了保证图的连通性，在图中新加一个节点Vs，图中每个节点Vi都能从Vs可达，建立边w(Vs，Vi) = 0。 
+3.对于每个差分约束Xj - Xi <= Bk(这里是小于等于号)，则建立边w(Xi，Xj) = Bk。 
+4.初始化Dist[] = INF，Dist[Vs] = 0. 
+5.求解以Vs为源点的单源最短路径，推荐用SPFA，因为一般可能存在负值。 
+如果图中存在负权回路，则该差分约束系统不存在可行解。 
+Vs到某点如果不存在最短路径，即最短路为INF，则对于该点表示的变量可以取任意值，都能满足差分约束的要求，如果存在最短路径，则得到该变量的最大值。 
+上述过程最终得到的解为满足差分约束系统各项的最大值。 
+注意点： 
+1. 如果要求最大值想办法把每个不等式变为标准 x - y <= k 的形式,然后建立一条从 y 到 x 权值为 k 的边，变得时候注意 x - y < k => x - y <= k-1。 
+2. 如果要求最小值的话，变为 x - y >= k 的标准形式，然后建立一条从 y到 x 权值为 k 的边，求出最长路径即可。 
+3. 如果权值为正，用Dijkstra，SPFA，BellmanFord都可以，如果为负不能用Dijkstra，并且需要判断是否有负环，有的话就不存在。
+
+例题
+/*
+1441.差分约束-区间交集 (10分) 
+C时间限制：1000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+三元组（ai，bi，ci）表示在整数区间[ai,bi]上至少有ci个整数属于集合Z。（整数集合Z的元素可以不连续）
+问Z最少包含多少个点。
+输入描述
+第一行一个整数n，表示区间个数.(1 <= n <= 50000)
+以下n行，每行是三个整数ai，bi，ci，由空格隔开
+输出描述
+Z的元素个数
+输入样例
+5
+3 7 3
+8 10 3
+6 8 1
+1 3 1
+10 11 1
+输出样例
+6
+
+hint 
+差分约束条件 ：X[bi]-X[ai-1]=Xci
+*/ 
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+#include<vector>
+#include<queue>
+using namespace std;
+const int MAX=5e5+7;
+const int INF=0x3f3f3f3f;
+struct node
+{
+	int to,c;
+}; 
+int n,mx,mn;
+vector<node> V[MAX];
+queue<int> q;
+void add(int x,int y,int z)
+{
+	V[x].push_back({y,z});
+}
+int dis[MAX],vis[MAX];
+void spfa()
+{
+	fill(dis+mn+1,dis+mx+1,-INF);
+	vis[mn]=1;
+	q.push(mn);
+	while(!q.empty())
+	{
+		int u=q.front();
+		q.pop();
+		vis[u]=0;
+		int len=V[u].size();
+		for(int i=0;i<len;i++)
+		{
+			int to=V[u][i].to;
+			int c=V[u][i].c;
+			if(dis[to]<dis[u]+c)
+			{
+				dis[to]=dis[u]+c;
+				if(!vis[to])
+				{
+					q.push(to);
+					vis[to]=1;
+				}
+			}
+		}
+	 } 
+	 printf("%d\n",dis[mx]);
+}
+
+int main()
+{
+	scanf("%d",&n);
+	for(int i=0,x,y,z;i<n;i++)
+	{
+		scanf("%d%d%d",&x,&y,&z);
+		add(x,y+1,z);
+		mx=max(y,mx);
+		mn=min(x,mn);
+	}
+	mx++;
+	for(int i=mn;i<mx;i++)
+	{
+		add(i,i+1,0);
+		add(i+1,i,-1);
+	}
+	spfa();
+	return 0;
+}
+
+
+
+
+
+
