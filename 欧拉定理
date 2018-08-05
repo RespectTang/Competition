@@ -1,0 +1,195 @@
+HDU 1395
+/*
+648.欧拉定理-最小x (10分) 
+C时间限制：1000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+给定一个n, 求满足 2^x =1 (mod n)的最小x.
+输入描述
+输入整数n
+输出描述
+输出最小的x, 或者输出“不存在”
+输入样例
+5
+输出样例
+4
+*/
+欧拉函数φ
+     欧拉定理是用来阐述素数模下，指数同余的性质。
+     欧拉定理：对于正整数N，代表小于等于N的与N互质的数的个数，记作φ(N)
+     例如φ(8)=4，因为与8互质且小于等于8的正整数有4个，它们是：1,3,5,7
+    欧拉定理还有几个引理，具体如下：
+    ①：如果n为某一个素数p，则φ(p)=p-1;
+    ①很好证明：因为素数p的质因数只有1和它本身，p和p不为互质，所以φ(p)=p-1；
+ 
+    ②：如果n为某一个素数p的幂次，那么φ(p^a)=(p-1)*p^(a-1)；
+    ②因为比p^a小的数有p^a-1个，那么有p^(a-1)-1个数能被p所整除（因为把1~p^a-1的p的倍数都筛去了）
+       所以φ(p)=p^a-1-(p^(a-1)-1)=(p-1)*p^(a-1)
+ 
+    ③：如果n为任意两个数a和b的积，那么φ(a*b)=φ(a)*φ(b)
+    ③因为比a*b小的数有a*b-1个，条件是a与b互质
+       那么可以知道，只有那些既满足a与其互质且既满足b与其互质的数满足条件。
+       根据乘法原理，这样的数可以互相组合，那么就有φ(a)*φ(b)个
+       所以可以得知φ(a*b)=φ(a)*φ(b) (注意条件必须满足a和b互质)
+ 
+   ④：设n=(p1^a1)*(p2^a2)*……*(pk^ak) (为N的分解式)
+         那么φ(n)=n*(1-1/p1)*(1-1/p2)*……*(1-1/pk)
+   ④因为各个分解完的p1、p2、……pk均为素数，所以它们均为互质的
+      每次再刨去它们本身，乘起来
+      剩下的运用容斥原理，再根据引理②和引理③就可以得出
+ 
+    欧拉定理：a^(φ(m))同余1(mod m) (a与m互质)
+ 
+欧拉函数的线性筛法----------------------------------------
+    大家都知道素数的线性筛法吧，欧拉函数也有线性筛法，可以在线性时间内求出1~N的所有φ
+    有以下三条性质：
+    
+    ①：φ(p)=p-1
+    ②：φ(p*i)=p*φ(i) （当p%i==0时）
+    ③：φ(p*i)=(p-1)*φ(i) (当p%i!=0时)
+
+/*****************************************线性筛法求解代码*******************************************************/
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+using namespace std;
+
+int prime[100001],mark[1000001];//prime是素数数组，mark为标记不是素数的数组
+int tot,phi[100001];//phi为φ(),tot为1~i现求出的素数个数
+void getphi(int N){
+    phi[1]=1;//φ(1)=1
+    for(int i=2;i<=N;i++){//从2枚举到N
+        if(!mark[i]){//如果是素数
+            prime[++tot]=i;//那么进素数数组，指针加1
+            phi[i]=i-1;//根据性质1所得
+        }
+        for(int j=1;j<=tot;j++){//从现求出素数枚举
+            if(i*prime[j]>N) break;//如果超出了所求范围就没有意义了
+            mark[i*prime[j]]=1;//标记i*prime[j]不是素数
+            if(i%prime[j]==0){//应用性质2
+                phi[i*prime[j]]=phi[i]*prime[j];break;
+            }
+            else phi[i*prime[j]]=phi[i]*phi[prime[j]];//应用性质3
+        }
+    }
+}
+
+int main()
+{
+	int N;
+	while(scanf("%d",&N)!=EOF)
+	{
+		if(N%2==0||N<=1)
+		printf("不存在\n");
+		else
+		{
+			getphi(N);
+			printf("%d\n",phi[N]);
+		}
+	}
+	
+}
+但是过不了，找了一个暴力提交的方法
+可提交：
+#include<stdio.h>
+int main()
+{
+	int x,t,n;
+	while(scanf("%d",&n)!=EOF)
+	{
+		if(n<=1||n%2==0)
+		printf("不存在\n");
+		else
+		{
+			x=1;
+			t=2;
+			while(t%n!=1)
+			{
+				x++;
+				t=t*2%n;
+			}
+			printf("%d\n",x);
+		}
+	}
+	return 0;
+} 
+/**********************************以下是三种暴力方法***************************************************/
+第一种
+#include <stdio.h>
+int main() {
+	int n,x,y,;
+	while(scanf("%d",&n)!=EOF) {
+		if(n<=1||n%2==0) {
+			printf("2^? mod %d = 1\n",n);
+			continue;
+		}
+		int w=2,x=1;
+		while(w!=1) {
+			x++;
+			w+=w;
+			w%=n;
+		}
+		printf("2^%d mod %d = 1\n",x,n);
+	}
+	return 0;
+}
+
+第二种
+#include <stdio.h>
+#include <stdlib.h>
+int main(
+{
+	int mod,n,x,y;
+	while(scanf("%d",&n)!=EOF) {
+		if(n<=1||n%2==0) {
+			printf("2^? mod %d = 1\n",n);
+			continue;
+		}
+		for(x=1,mod=2;; x++,mod+=mod) {
+			if(mod>n)   mod-=n;
+			if(mod==1) break;
+		}
+		printf("2^%d mod %d = 1\n",x,n);
+	}
+	return 0;
+}
+
+第三种
+#include <stdio.h>
+#include <math.h>
+int main() {
+	int n;
+	int i;
+	while(scanf("%d", &n) != EOF) {
+		for(i=1; i<20; i++) {
+			if((  (int)pow(2, i)  % n) == 1)
+				break;
+		}
+		if(i <20)
+			printf("2^%d mod %d = 1\n",i, n);
+		else
+			printf("2^? mod %d = 1\n",n);
+	}
+	return 0;
+}
+
+
+/********************模板*********************************************/
+费马小定理：当p是一个质数时，且a和p互质，有ap-1=1(mod p) （欧拉定理的一种特殊情况）
+欧拉定理：如果a和n互质，那么aφ(n)=1(mod n)
+
+对于任意a,b,n就有 ab=aφ(n)+b mod φ(n)(mod n) 处理b数值较大的情况 ，采用分治思想，复杂度为O（logn）
+int mod = n;
+
+int fastpow(int a,int b)
+{
+    long long ret = 1;
+    tmp = a;
+    while(b)
+    {
+        if(b&1)
+            ret = ret*tmp%mod;
+        tmp = (long long)tmp*tmp%mod;
+        n>>1;
+    }
+    return ret;
+}
