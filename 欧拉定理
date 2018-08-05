@@ -193,3 +193,9 @@ int fastpow(int a,int b)
     }
     return ret;
 }
+
+参考资料
+https://blog.csdn.net/hello_sheep/article/details/77422302
+https://baike.baidu.com/item/欧拉定理/891345?fr=aladdin
+https://blog.csdn.net/update7/article/details/70943545
+https://blog.csdn.net/foreverlove111/article/details/70504631
