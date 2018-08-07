@@ -1,0 +1,141 @@
+/*
+1452.最短路-畅通工程续 (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+某省自从实行了很多年的畅通工程计划后，终于修建了很多路。不过路多了也不好，每次要从一个城镇到另一个城镇时，
+都有许多种道路方案可以选择，而某些方案要比另一些方案行走的距离要短很多。这让行人很困扰。
+现在，已知起点和终点，请你计算出要从起点到终点，最短需要行走多少距离。
+输入描述
+本题目包含多组数据，请处理到文件结束。
+每组数据第一行包含两个正整数N和M(0<N<200,0<M<1000)，分别代表现有城镇的数目和已修建的道路的数目。城镇分别以0～N-1编号。
+接下来是M行道路信息。每一行有三个整数A,B,X(0<=A,B<N,A!=B,0<X<10000),表示城镇A和城镇B之间有一条长度为X的双向道路。
+再接下一行有两个整数S,T(0<=S,T<N)，分别代表起点和终点。
+输出描述
+对于每组数据，请在一行里输出最短需要行走的距离。如果不存在从S到T的路线，就输出-1.
+输入样例
+3 3
+0 1 1
+0 2 3
+1 2 1
+0 2
+3 1
+0 1 1
+1 2
+输出样例
+2
+-1
+*/
+
+#include<iostream>
+#include<cstdio>
+using namespace std;
+const int INF=0x3f3f3f3f;
+int N,M;
+int map[210][210];
+
+void floyd()
+{
+	for(int k=0;k<N;k++)
+	{
+		for(int i=0;i<N;i++)
+		{
+			for(int j=0;j<N;j++)
+			{
+				if(map[i][j]>map[i][k]+map[k][j])
+				{
+					map[i][j]=map[i][k]+map[k][j];
+				}
+			}
+		}
+	}
+
+}
+
+int main()
+{
+	//int aa[1000];
+//	int count=0;
+	while(scanf("%d%d",&N,&M)!=EOF)
+	{
+		for(int i=0;i<N;i++)
+			for(int j=0;j<N;j++)
+			{
+					map[i][j]=INF;
+					map[i][i]=0;
+			}
+			
+		for(int i=0;i<M;i++)
+		{
+			int A,B,X;
+			cin>>A>>B>>X;
+			if(map[A][B]>X)
+				map[A][B]=map[B][A]=X;
+		}
+		int S,T;
+		cin>>S>>T;
+		floyd();
+		if(map[S][T]==INF)
+			//aa[count++]=-1;
+			printf("-1\n");
+		else
+			//aa[count++]=map[S][T];
+			printf("%d\n",map[S][T]);
+	}
+//	for(int i=0;i<count;i++)
+//		printf("%d\n",aa[i]);
+	
+	return 0;
+}
+
+
+
+/*
+djistra版可提交
+#include<stdio.h>
+#include<string.h>
+const int INF = 1000000000;
+int d[210],vis[210],w[210][210];
+int main()
+{
+    int n,m,i,j,k;
+    while(~scanf("%d%d", &n,&m))
+    {
+        memset(vis, 0, sizeof(vis));
+        memset(w, 0, sizeof(w));
+        int a,b,c,s,e;
+        for(i=0; i<m; i++)
+        {
+            scanf("%d%d%d", &a,&b,&c);
+            if(w[a][b] == 0) w[a][b] = w[b][a] = c; //可能有同起终点但距离不同的情况
+            else if(c < w[a][b]) w[a][b] = w[b][a] = c; //如果是同一条路，则距离值最小的那条路
+        }
+        scanf("%d%d", &s,&e);
+        for(i=0; i<n; i++) //d[i]代表从起点到i点的最短距离
+            d[i] = (i == s ? 0 : INF); //谁是起点就赋值为0，其余赋值为无穷
+        for(i=0; i<n; i++)
+        {
+            int mmin = INF;
+            for(j=0; j<n; j++)
+                if(!vis[j] && d[j] <= mmin)
+                    mmin = d[k=j];
+            vis[k] = 1;
+            for(j=0; j<n; j++)
+                if(!vis[j] && w[k][j] && d[k]+w[k][j] < d[j])
+                    d[j] = d[k]+w[k][j];
+        }
+        if(d[e] == INF) printf("-1\n");
+        else  printf("%d\n", d[e]);
+    }
+    return 0;
+}
+*/
+参考资料
+https://www.cnblogs.com/jackge/archive/2013/01/01/2841536.html
+https://blog.csdn.net/zhenzheni/article/details/47732265
+
+
+
+
+
+
+
