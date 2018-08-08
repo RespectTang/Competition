@@ -1,0 +1,68 @@
+/*
+1448.搜索-部分和问题 (10分) 
+C时间限制：1 毫秒 |  C内存限制：65535 Kb
+题目内容：
+给定整数a1、a2、.......an，判断是否可以从中选出若干数，使它们的和恰好为K。(单组数据输入！)
+输入描述
+首先，n和k，n表示数的个数，k表示数的和。
+接着一行n个数。
+（1<=n<=20,保证不超int范围）
+输出描述
+如果和恰好可以为k，输出“YES”（换行），并按输入顺序依次输出是由哪几个数的和组成（需要保留行尾的空格再换行），否则“NO”（直接换行）
+输入样例
+4 13
+1 2 4 7
+输出样例
+YES
+2 4 7
+*/
+#include<iostream>
+#include<cstdio>
+using namespace std;
+int n,k;
+int sum,flag;
+int aa[22],bb[22];
+void dfs(int x)
+{
+	if(sum>=k)
+	{
+		if(sum==k)
+		{
+			if(flag==1)
+			{
+				flag=0;
+				printf("YES\n");
+			}
+			for(int i=0;i<n;i++)
+				if(bb[i]!=0) printf("%d ",aa[i]);
+				printf("\n");
+		}
+			return;//如果大于k直接return 
+	}
+	
+	for(int i=x;i<n;i++)//dfs 
+	{
+		sum+=aa[i];
+		bb[i]=1;
+		dfs(i+1);
+		sum-=aa[i];
+		bb[i]=0;
+	}
+}
+
+int main()
+{
+	
+	scanf("%d%d",&n,&k);
+	fill(bb,bb+n,0);
+	for(int i=0;i<n;i++)
+		scanf("%d",&aa[i]);
+	sum=0;
+	flag=1;
+	dfs(0);
+	if(flag)
+		printf("NO\n"); 
+	
+}
+
+//参考资料：https://blog.csdn.net/briup_acmer/article/details/38372121
