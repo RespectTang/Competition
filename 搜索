@@ -1,5 +1,5 @@
 /*
-1448.搜索-部分和问题 (10分) 
+1448.搜索-部分和问题 (10分) DFS
 C时间限制：1 毫秒 |  C内存限制：65535 Kb
 题目内容：
 给定整数a1、a2、.......an，判断是否可以从中选出若干数，使它们的和恰好为K。(单组数据输入！)
@@ -66,3 +66,294 @@ int main()
 }
 
 //参考资料：https://blog.csdn.net/briup_acmer/article/details/38372121
+/*************************************************************************************************************************
+1449.搜索-Dungeon Master (10分) BFS
+C时间限制：1 毫秒 |  C内存限制：65536 Kb
+题目内容：
+ You are trapped in a 3D dungeon and need to find the quickest way out! The dungeon is composed of unit cubes 
+ which may or may not be filled with rock. It takes one minute to move one unit north, south, east, west, up 
+ or down. You cannot move diagonally and the maze is surrounded by solid rock on all sides. 
+
+Is an escape possible? If yes, how long will it take? 
+题目链接：http://poj.org/problem?id=2251
+输入描述
+The input consists of a number of dungeons. Each dungeon description starts with a line containing three
+ integers L, R and C (all limited to 30 in size). 
+L is the number of levels making up the dungeon. 
+R and C are the number of rows and columns making up the plan of each level. 
+Then there will follow L blocks of R lines each containing C characters. Each character describes one cell
+ of the dungeon. A cell full of rock is indicated by a '#' and empty cells are represented by a '.'. Your 
+ starting position is indicated by 'S' and the exit by the letter 'E'. There's a single blank line after 
+ each level. Input is terminated by three zeroes for L, R and C.
+
+输出描述
+Each maze generates one line of output. If it is possible to reach the exit, print a line of the form 
+Escaped in x minute(s).
+
+where x is replaced by the shortest time it takes to escape. 
+If it is not possible to escape, print the line 
+Trapped!
+
+输入样例
+3 4 5
+S....
+.###.
+.##..
+###.#
+
+#####
+#####
+##.##
+##...
+
+#####
+#####
+#.###
+####E
+
+1 3 3
+S##
+#E#
+###
+
+0 0 0
+
+输出样例
+Escaped in 11 minute(s).
+Trapped!
+*/ 
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+struct node
+{
+    int x;
+    int y;
+    int z;
+    int num;
+} link[40000];
+
+int op, tp, l, m, n, flag, ans;
+int v[44][44][44];///标记当前结点是否入队过
+char st[44][44][44];///记录原始输入数据
+int jk[6][3]={{0,1,0},{1,0,0},{0,-1,0},{-1,0,0},{0,0,-1},{0,0,1}};
+//jk数组实现6个移动方向
+void BFS();
+bool Judge(int dz, int dx, int dy);
+
+
+
+bool Judge(int dz,int dx,int dy)//判断移动方向是否合法
+{
+	if(dx<0||dx>=m||dy<0||dy>=n||dz<0||dz>=1)
+		return false;
+	else
+		return true;
+	  
+}
+ 
+void BFS()
+{
+	int x,y,z,i;
+	while(op<tp)
+	{
+		for(i=1;i<6;i++)
+		{
+			x=link[op].x+jk[i][0];
+			y=link[op].y+jk[i][1];
+			z=link[op].z+jk[i][2];
+			if(Judge(z,x,y)&&v[z][x][y]==0)//判断移动方向是否合法 
+			{
+				if(st[z][x][y]=='.')//判断移动方向节点是否符合条件可以入队 
+				{
+					v[z][x][y]=1;//标记移动方向节点入队 
+					link[tp].x=x;
+					link[tp].y=y;
+					link[tp].num=link[op].num+1;
+					tp++; 	
+				}
+				else if(st[z][x][y]=='E')
+				{
+					v[z][x][y]=1;//标记移动方向节点入队 
+					flag=1;
+					ans=link[op].num+1;
+					break;
+				} 
+			}
+		}
+		if(flag) break;//可到达目标节点
+		op++; 	
+	}
+}
+
+
+int main()
+{
+	int i,j,k;
+	while(scanf("%d %d %d",&l,&m,&n)&&(l!=0||n!=0||m!=0))
+	{
+		op=tp=flag=0;
+		memset(v,0,sizeof(v));
+		for(i=0;i<40000;i++)
+			link[i].num=0;
+		for(i=0;i<l;i++)
+		{
+			for(j=0;j<m;j++)
+			{
+				scanf("%s",st[i][j]);
+			}
+		}
+		for(i=0;i<l;i++)
+		{
+			for(j=0;j<m;j++)
+			{
+				for(k=0;k<n;k++)
+				{
+					if(st[i][j][k]=='S')
+					{
+						link[tp].x=j;//入队 
+						link[tp].y=k;
+						link[tp].z=i;
+						tp++;
+						v[i][j][k]=1;//标记 
+						break;
+					}
+				}
+				if(k!=n) break;
+			}
+			if(j!=m) break;
+		}
+		BFS();
+		if(flag)
+			printf("Escaped in %d minute(s).\n",ans);
+		else
+			printf("Trapped!\n");
+	}
+	return 0;
+ } 
+
+/*我不知道为什么明明是一样的代码这个就过了
+参考资料：https://blog.csdn.net/blessingxry/article/details/72473618
+
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+struct node
+{
+    int x;
+    int y;
+    int z;
+    int num;
+} link[40000];
+
+int op, tp, l, m, n, flag, ans;
+int v[44][44][44];///标记当前结点是否入队过
+char st[44][44][44];///记录原始输入数据
+int jk[6][3] = {{0, 1, 0}, {1, 0, 0}, {0, -1, 0}, {-1, 0, 0}, {0, 0, -1}, {0, 0, 1}};
+///jk数组实现6个移动方向
+
+void BFS();
+bool Judge(int dz, int dx, int dy);
+
+int main()
+{
+    int i, j, k;
+    while(scanf("%d %d %d", &l, &m, &n) && (l != 0 || n != 0 || m != 0))
+    {
+        ///getchar();///吸收回车符
+        op = tp = flag = 0;
+        memset(v, 0, sizeof(v));
+        for(i = 0; i < 40000; i++)
+            link[i].num = 0;
+        for(i = 0; i < l; i++)
+        {
+            for(j = 0; j < m; j++)
+            {
+                scanf("%s", st[i][j]);
+                ///getchar();///吸收回车符
+            }
+            ///getchar();///吸收回车符
+        }
+        for(i = 0; i < l; i++)
+        {
+            for(j = 0; j < m; j++)
+            {
+                for(k = 0; k < n; k++)
+                {
+                    if(st[i][j][k] == 'S')
+                    {
+                        link[tp].x = j;///入队操作
+                        link[tp].y = k;///入队操作
+                        link[tp].z = i;///入队操作
+                        tp++;///入队操作
+                        v[i][j][k] = 1;///标记当前结点已入队
+                        break;
+                    }
+                }
+                if(k != n)
+                    break;
+            }
+            if(j != m)
+                break;
+        }
+
+        BFS();///广度优先搜索
+        if(flag)
+            printf("Escaped in %d minute(s).\n", ans);
+        else
+            printf("Trapped!\n");
+    }
+    return 0;
+}
+bool Judge(int dz, int dx, int dy)///判断移动方向结点是否合法
+{
+    if(dx < 0 || dx >= m || dy < 0 || dy >= n || dz < 0 || dz >= l)
+        return false;
+    else
+        return true;
+}
+void BFS()///广度优先搜索
+{
+    int x, y, z, i;///注意不要混淆x,y,z的含义
+    while(op < tp)
+    {
+        for(i = 0; i < 6; i++)
+        {
+            x = link[op].x + jk[i][0];
+            y = link[op].y + jk[i][1];
+            z = link[op].z + jk[i][2];
+            if(Judge(z, x, y) && v[z][x][y] == 0)///判断移动方向结点是否符合合法和移动方向结点未入队过的条件
+            {
+
+                if(st[z][x][y] == '.')///判断移动方向结点是否符合可入队条件
+                {
+                    v[z][x][y] = 1;///标记移动方向结点入队
+                    link[tp].x = x;
+                    link[tp].y = y;
+                    link[tp].z = z;
+                    link[tp].num = link[op].num + 1;
+                    tp++;
+                }
+                else if(st[z][x][y] == 'E')///判断是否到达目标结点
+                {
+                    v[z][x][y] = 1;///标记移动方向结点入队
+                    flag = 1;
+                    ans = link[op].num + 1;
+                    break;
+                }
+            }
+        }
+        if(flag)///可到达目标结点
+            break;
+        op++;///当前结点出队
+    }
+}
+*/
