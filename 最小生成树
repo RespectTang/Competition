@@ -1,0 +1,73 @@
+/*
+1459.最小生成树-道路建设 (10分) 
+C时间限制：1000 毫秒 |  C内存限制：1000 Kb
+题目内容：
+随着如今社会的不断变化，交通问题也变得越来越重要，所以市长决定建设一些公路来方便各个城市之间的贸易和交易。虽然市长的想法很好，但是他也遇到了一般人也经常头疼的问题，那就是手头的经费有限……在规划过程中，设计师们已经预算出部分城市之间建设公路的经费需求。现在市长想知道，它能不能将他的m个城市在有限的经费内实现公路交通。如果可以的话，输出Yes，否则输出No（两个城市不一定要直接的公路相连，间接公路到达也可以。）
+输入描述
+测试输入包含多条测试数据
+每个测试数据的第1行分别给出可用的经费c(<1000000)，道路数目n(n<10000)，以及城市数目m(<100)。
+接下来的n行给出建立公路的成本信息，每行给出三个整数，分别是相连的两个城市v1、v2(0<v1,v2<=m)以及建设公路所需的成本h(h<100)。
+输出描述
+对每个测试用例，输出Yes或No
+输入样例
+20 10 5
+1 2 6
+1 3 3
+1 4 4
+1 5 5
+2 3 7
+2 4 7
+2 5 8
+3 4 6
+3 5 9
+4 5 2
+输出样例
+Yes
+*/
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+using namespace std;
+
+int p[105];
+struct node{
+	int u,v,w;
+}s[10005];
+bool cmp(node A,node B)
+{
+	return A.w<B.w;
+}
+
+int find(int x)
+{
+	return x==p[x]?x:find(p[x]);
+}
+
+int main()
+{
+	int c,n,m;
+	while(cin>>c>>n>>m)
+	{
+		for(int i=1;i<=101;i++)
+			p[i]=i;
+		for(int i=0;i<n;i++)
+			scanf("%d %d %d",&s[i].u,&s[i].v,&s[i].w);
+		sort(s,s+n,cmp);
+		int ans=0;
+		for(int i=0;i<n;i++)
+		{
+			if(find(s[i].u)!=find(s[i].v))
+			{
+				p[find(s[i].v)]=find(s[i].u);
+				ans+=s[i].w;	
+			}
+		}
+		if(ans<=c)
+			printf("Yes\n");//puts("Yes");
+		else 
+			printf("No\n");
+		//	puts("No");
+	}
+	return 0;	
+
+} 
