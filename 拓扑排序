@@ -87,6 +87,103 @@ int main()
 /***************************************************************************************************/
 
 
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+#define M 30
+int  re[M],path[M][M],du[M],d[M];
+char str[8];
+int tuopu(char s[],int n)
+{
+	int i,j,k;
+	int A=s[0]-'A';
+	int B=s[2]-'A';
+	if(!path[A][B])
+	{
+		path[A][B]=1;
+		d[B]++;
+	}
+	for(i=0;i<n;i++)
+		du[i]=d[i];
+	int flag=1,cnt,pos=0;
+	for(i=0;i<n;i++)
+	{
+		cnt=0;
+		for(j=0;j<n;j++)
+		{
+			if(du[j]==0)
+			{
+				cnt++;
+				k=j;
+			}
+		}
+		if(cnt==0) return -1;//cnt=0表示存在环
+		else if(cnt>1) flag=0;
+		du[k]--;
+		re[pos++]=k;
+		for(j=0;j<n;j++)
+		{
+			if(path[k][j]==1)
+				du[j]--;
+		 } 
+	}
+	if(flag) return 1;
+	return 0;
+}
+
+void result(int n,int m)
+{
+	int i,j;
+	int ok=1;
+	for(i=0;i<m;i++)
+	{
+		scanf("%s",str);
+		if(ok)
+		{
+			int t=tuopu(str,n);
+			if(t==1)
+			{
+				printf("Sorted sequence determined after %d relations: ",i+1);
+				for(j=0;j<n;j++)
+					printf("%c",char(re[j]+'A'));
+				printf(".\n");
+				ok=0;
+			}
+			else if(t==-1)
+			{
+				printf("Inconsistency found after %d relations.\n",i+1);
+				ok=0;
+			}
+		}
+	}
+	if(ok)	printf("Sorted sequence cannot be determined.\n");
+}
+
+int main()
+{
+	int n,m;
+	char str[8];
+	while(scanf("%d%d",&n,&m),n+m)
+	{
+		if(m<n-1)
+		{
+			for(int i=0;i<m;i++)
+				scanf("%s",str);
+			printf("Sorted sequence cannot be determined.\n");
+		}	
+		else
+		{
+			memset(d,0,sizeof(d));
+			memset(path,0,sizeof(path));
+			result(n,m);
+		}
+	}
+
+}
+
+
+
 
 
 
