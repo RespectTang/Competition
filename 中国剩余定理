@@ -220,3 +220,134 @@ https://blog.csdn.net/tick_tock97/article/details/71313058
 https://www.cnblogs.com/MashiroSky/p/5918158.html
 https://blog.csdn.net/hushhw/article/details/76281352
 https://blog.csdn.net/xiaotaoqibao/article/details/5781131
+/******************************************************************************************************/
+/*
+1465.拓展CRT (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+Elina is reading a book written by Rujia Liu, which introduces a strange way to express
+non-negative integers. The way is described as following:
+Choose k different positive integers a1, a2, …, ak. For some non-negative m, divide it 
+by every ai (1 ≤ i ≤ k) to find the remainder ri. If a1, a2, …, ak are properly chosen
+, m can be determined, then the pairs (ai, ri) can be used to express m.
+“It is easy to calculate the pairs from m, ” said Elina. “But how can I find m from the pairs?”
+Since Elina is new to programming, this problem is too difficult for her. Can you help her?
+输入描述
+The input contains multiple test cases. Each test cases consists of some lines.
+Line 1: Contains the integer k.
+Lines 2 ~ k + 1: Each contains a pair of integers ai, ri (1 ≤ i ≤ k).
+输出描述
+Output the non-negative integer m on a separate line for each test case. If there are multiple 
+possible values, output the smallest one. If there are no possible values, output -1.
+输入样例
+2
+8 7
+11 9
+输出样例
+31
+描述              
+Elina正在读茹佳柳写的一本书，它介绍了一种表达非负整数的奇怪方法。方式如下：              
+选择k个不同的正整数A1，A2，…，AK。对于一些非负M，将它除以每个AI（1±i＝k）以找到余数RI。
+如果A1、A2、…、AK被适当地选择，M可以被确定，那么对（AI，RI）可以用来表示M。              
+Elina说：“计算M对很容易。”“但是我怎么才能从巴黎找到M呢？“              
+由于Elina对编程很陌生，这个问题对她来说太难了。你能帮助她吗？              
+输入              
+输入包含多个测试用例。每个测试用例由一些行组成。              
+第1行：包含整数k。              
+行2～k+ 1：每个包含一对整数AI，RI（1±i±k）。              
+产量              
+在每个测试用例的单独的行上输出非负整数M。如果存在多个可能值，则输出最小值。如果没有可能的值，输出- 1。
+
+hint:
+这道题的题意就是让你求同余方程的解，但是有一点不一样的是 他给的余数并不是互素的。 
+这里需要一个个的合并一下
+x=a1+m1x1
+x=a2+m2x2
+所以 a1+m1x1=a2+m2x2 转移一下 m1x1-m2x2=a2-a1
+用扩展欧几里得算出x1的最小整数解 带入到x=a1+m1x1
+等到x后合并为一个方程
+y=x(mod lcm(m1,m2)) 
+
+https://blog.csdn.net/sinat_30126425/article/details/52155733
+*/
+
+#include<iostream>
+#include<cstring> 
+#include<cmath>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+typedef long long ll;
+const int maxn=1005;
+ll m[maxn],a[maxn],s[maxn];
+ll gcd(ll a,ll b)
+{
+	return b?gcd(b,a%b):a;
+}
+void extend_Euclid(ll a,ll b,ll &x,ll &y)
+{
+	if(b==0)
+	{
+		x=1;y=0;return;
+	}
+	extend_Euclid(b,a%b,x,y);
+	ll tmp=x;
+	x=y;
+	y=tmp-(a/b)*y;
+}
+
+ll Inv(ll a,ll b)
+{
+	ll d=gcd(a,b);
+	if(d!=1) return -1;
+	ll x,y;
+	extend_Euclid(a,b,x,y);
+	return (x%b+b)%b;
+}
+
+bool merge(ll a1,ll m1,ll a2,ll m2,ll &a3,ll &m3)
+{
+	ll d=gcd(m1,m2);
+	ll c=a2-a1;
+	if(c%d) return false;
+	c=(c%m2+m2)%m2;
+	m1/=d;
+	m2/=d;
+	c/=d;
+	c*=Inv(m1,m2);
+	c%=m2;
+	c*=m1*d;
+	c+=a1;
+	m3=m1*m2*d;
+	a3=(c%m3+m3)%m3;
+	return true; 
+}
+
+ll CRT(ll a[],ll m[],int n)
+{
+	ll a1=a[1];
+	ll m1=m[1];
+	for(int i=2;i<=n;i++)
+	{
+		ll a2=a[i];
+		ll m2=m[i];
+		ll m3,a3;
+		if(!merge(a1,m1,a2,m2,a3,m3))
+			return -1;
+		a1=a3;
+		m1=m3;
+	}
+	return (a1%m1+m1)%m1;
+}
+
+int main()
+{
+	int n;
+	while(~scanf("%d",&n))
+	{
+		for(int i=1;i<=n;i++)
+			scanf("%lld%lld",&m[i],&a[i]);
+		cout<<CRT(a,m,n)<<endl;
+	}
+	return 0;
+}
