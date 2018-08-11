@@ -199,3 +199,69 @@ https://blog.csdn.net/hello_sheep/article/details/77422302
 https://baike.baidu.com/item/欧拉定理/891345?fr=aladdin
 https://blog.csdn.net/update7/article/details/70943545
 https://blog.csdn.net/foreverlove111/article/details/70504631
+/***************************************************************************************************************/
+/*
+1466.欧拉函数-Relatives (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+Given n, a positive integer, how many positive integers less than n are relatively
+ prime to n? Two integers a and b are relatively prime if there are no integers 
+ x > 1, y > 0, z > 0 such that a = xy and b = xz
+输入描述
+There are several test cases. For each test case, standard input contains a line
+ with n <= 1,000,000,000. A line containing 0 follows the last case.
+输出描述
+For each test case there should be single line of output answering the question posed above.
+输入样例
+7
+12
+0
+输出样例
+6
+4
+
+描述              
+给定N，一个正整数，有多少个正整数小于n互质的N？
+两个整数a和b是互质的如果没有整数x＞1，y＞0，Z＞0，XY，XZ B = =。              
+输入              
+有几个测试用例。对于每一个测试案例，标准输入包含N <= 1000000000线。一个包含0的行跟随最后的情况。              
+产量              
+对于每个测试用例应该有输出回答上面提出的问题单。 
+
+http://www.cnblogs.com/ZERO-/p/6560676.html
+*/ 
+
+#include<cstdio>
+#include<iostream>
+using namespace std;
+typedef long long ll;
+
+ll euler(ll n)
+{
+	ll ans=n;
+	for(int i=2;i*i<=n;i++)
+	{
+		if(n%i==0)
+		{
+			ans=ans/i*(i-1);
+			while(n%i==0)
+				n/=i;
+		}
+	}
+	if(n>1) ans=ans/n*(n-1);
+	return ans;
+}
+
+int main()
+{
+	ll n;
+	while(~scanf("%lld",&n))
+	{
+		if(n==0) break;
+		euler(n);
+		printf("%lld\n",euler(n));
+	}
+	return 0;
+}
+
+
