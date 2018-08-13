@@ -1,0 +1,141 @@
+好难哦看不懂
+
+真的好难
+
+嘤
+
+/**************************************************************************************************************************/
+参考资料：
+https://blog.csdn.net/Ripped/article/details/70263965
+https://blog.csdn.net/lixuepeng_001/article/details/50577932
+/***************************************************************************************************************************/
+莫比乌斯函数的线性筛法
+
+void Init(){
+    int N=maxn;
+    memset(prime,0,sizeof(prime));
+    memset(mu,0,sizeof(mu));
+    memset(vis,0,sizeof(vis));
+    mu[1] = 1;
+    cnt = 0;
+    for(int i=2; i<N; i++){
+        if(!vis[i]){
+            prime[cnt++] = i;
+            mu[i] = -1;
+        }
+        for(int j=0; j<cnt&&i*prime[j]<N; j++){
+            vis[i*prime[j]] = 1;
+            if(i%prime[j]) mu[i*prime[j]] = -mu[i];
+            else{
+                mu[i*prime[j]] = 0;
+                break;
+                }
+        }
+    }
+}
+/***************************************************************************************************************************/
+题目及代码
+/*
+647.莫比乌斯-gcd配对数 (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+给你5个整数a,b,c,d,k, 求满足a <= x <= b && c <= y <= d && gcd(x,y)=k 的数对(x,y)的对数。
+规定（x,y）和（y,x）不重复计数。
+输入描述
+第一行输入测试用例的个数n, 接下来是n行测试用例
+每行测试用例包括a b c d k共5个数，其中 0 < a <= b <= 100,000,
+ 0 < c <= d <= 100,000, 0 <= k <= 100,000, 
+（为了简单起见，可以假设a=c=1）
+输出描述
+输出n行， 每行是一个测试用例中的对数。
+输入样例
+2
+1 3 1 5 1
+1 11014 1 14409 9
+输出样例
+9
+736427
+*/ 
+ 
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+
+const int maxn=1e5+7;
+bool vis[maxn];
+int prime[maxn],mu[maxn];
+int cnt;
+
+void Init()
+{
+	int N=maxn;
+	memset(prime,0,sizeof(prime));
+	memset(mu,0,sizeof(mu));
+	memset(vis,0,sizeof(vis));
+	mu[1]=1;
+	cnt=0;
+
+	for(int i=2;i<N;i++)
+	{
+		if(!vis[i])
+		{
+			prime[cnt++]=i;
+			mu[i]= -1;
+		}
+		for(int j=0;j<cnt&&i*prime[j]<N;j++)
+		{
+			vis[i*prime[j]]=1;
+			if(i%prime[j]) mu[i*prime[j]]=-mu[i];
+			else
+			{
+				mu[i*prime[j]]=0;
+				break;
+			}
+		}
+	}
+}
+
+void getMu()
+{
+	int N=maxn;
+	for(int i=1;i<N;i++)
+	{
+		int target=i==1?1:0;
+		int delta=target-mu[i];
+		mu[i]=delta;
+		for(int j=2*i;j<N;j+=i)
+			mu[j]+=delta;
+	}
+}
+
+int main()
+{
+	int a,b,c,d,k;
+	int T;
+	Init();
+	cin>>T;
+	while(T--)
+	{
+		cin>>a>>b>>c>>d>>k;
+		if(k==0)
+		{
+			cout<<"0"<<endl;
+			continue;
+		}
+		b/=k,d/=k;
+		long long ans1=0,ans2=0;
+		for(int i=1;i<=min(b,d);i++)
+		{
+			ans1+=(long long)mu[i]*(b/i)*(d/i); 
+		}
+		for(int i=1;i<=min(b,d);i++)
+		{
+			ans2+=(long long)mu[i]*(min(b,d)/i)*(min(b,d)/i);
+		}
+		cout<<ans1-ans2/2<<endl;
+	}
+}
+/***************************************************************************************************************************/
