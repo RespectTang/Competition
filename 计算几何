@@ -577,6 +577,193 @@ int main()
 HDU 2892 HDU 4404
 参考资料：https://www.cnblogs.com/mypsq/p/4366893.html
 /***********************************************************************************************************************/
+/*
+649.计算几何-空袭计算 (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+轰炸机轰炸的目标区域是地面上一个n个顶点的多边形，现在三维坐标(x,y,h)处投一颗炸弹，飞行速度是（vx,vy,0）,
+重力加速度是10。炸弹的爆炸半径是r, 现需要了解被炸的区域面积.
+输入描述
+第一行是x y h
+第二行是vx vy
+第三行是炸弹的爆炸半径r
+第四行是n,代表目标区域的顶点数
+下面是n行是目标多变形的顶点坐标，按顺时针给出
+输出描述
+被炸的区域面积（两位小数）
+输入样例
+0 0 2000
+100 0
+100 
+4
+1900 100
+2000 100
+2000 -100
+1900 -100
+输出样例
+15707.96
+
+https://www.cnblogs.com/mypsq/p/4366893.html
+*/ 
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<cmath>
+#include<algorithm>
+#define M 100009
+#define inf 1000000000000
+#define eps 1e-12
+#define mod 1000000007
+#define PI acos(-1.0)
+using namespace std;
+typedef long long ll;
+
+struct node{
+	double x,y;
+	node(){}
+	node(double xx,double yy)
+	{
+		x=xx;
+		y=yy;
+	}
+	node operator-(node s)
+	{
+		return node(x-s.x,y-s.y);
+	}
+	node operator+(node s)
+	{
+		return node(x+s.x,y+s.y);
+	}
+	double operator*(node s)
+	{
+		return x*s.x+y*s.y;
+	}
+	double operator^(node s)
+	{
+		return x*s.y-y*s.x;
+	}
+}p[M];
+
+double max(double a,double b)
+{
+	return a>b?a:b;
+}
+double min(double a,double b)
+{
+	return a<b?a:b;
+}
+
+double len(node a)
+{
+	return sqrt(a*a);
+}
+double dis(node a,node b)//两点之间的距离
+{
+	return len(b-a);	
+}
+double cross(node a,node b,node c)//叉乘 
+{
+	return (b-a)^(c-a);
+}
+double dot(node a,node b,node c)//点乘
+{
+	return (b-a)*(c-a);	
+} 
+
+int judge(node a,node b,node c)//判断c是否在ab线段上（前提是c在直线ab上）
+{
+	if(c.x>=min(a.x,b.x)&&c.x<=max(a.x,b.x)&&c.y>=min(a.y,b.y)&&c.y<=max(a.y,b.y))
+		return 1;
+	else return 0;	
+} 
+
+double area(node b,node c,double r)
+{
+	node a(0.0,0.0);
+	if(dis(b,c)<eps) return 0.0;
+	double h=fabs(cross(a,b,c))/dis(b,c);
+	if(dis(a,b)>r-eps&&dis(a,c)>r-eps)//两个端点都在圆的外面则分为两种情况
+	{
+		double angle=acos(dot(a,b,c)/dis(a,b)/dis(a,c));
+		if(h>r-eps)
+		{
+			return 0.5*r*r*angle;
+		}
+		else if(dot(b,a,c)>0&&dot(c,a,b)>0)
+		{
+			double angle1=2*acos(h/r);
+			return 0.5*r*r*fabs(angle-angle1)+0.5*r*r*sin(angle1);
+		}
+		else
+		{
+			return 0.5*r*r*angle;
+		}
+	}
+	else if(dis(a,b)<r+eps&&dis(a,c)<r+eps)//两个端点都在园内的情况
+	{
+		return 0.5*fabs(cross(a,b,c));
+	} 
+	else//一个端点在圆上一个端点在圆内的情况
+	{
+		if(dis(a,b)>dis(a,c))
+		{
+			swap(b,c);
+		}
+		if(fabs(dis(a,b))<eps)//an距离为0直接返回0
+		{
+			return 0.0;
+		}
+		if(dot(b,a,c)<eps)
+		{
+			double angle1=acos(h/dis(a,b));
+			double angle2=acos(h/r)-angle1;
+			double angle3=acos(h/dis(a,c))-acos(h/r);
+			return 0.5*dis(a,b)*r*sin(angle2)+0.5*r*r*angle3;
+		} 
+		else
+		{
+			double angle1=acos(h/dis(a,b));
+			double angle2=acos(h/r);
+			double angle3=acos(h/dis(a,c))-angle2;
+			return 0.5*r*dis(a,b)*sin(angle1+angle3)+0.5*r*r*angle3;
+		}
+	 } 
+}
+
+int main()
+{
+	double x,y,h,x1,y1,R;
+	while(scanf("%lf%lf%lf",&x,&y,&h)!=EOF)
+	{
+		scanf("%lf%lf%lf",&x1,&y1,&R);
+		int n;
+		scanf("%d",&n);
+		for(int i=0;i<n;i++)
+		{
+			scanf("%lf%lf",&p[i].x,&p[i].y);	
+		}
+		p[n]=p[0];
+		double V=sqrt(2*10*h);
+		double t0=V/10;
+		double x0=x+x1*t0;
+		double y0=y+y1*t0;
+		node o(x0,y0);
+		for(int i=0;i<=n;i++)
+			p[i]=p[i]-o;
+		o=node(0,0);
+		double sum=0;
+		for(int i=0;i<n;i++)
+		{
+			int j=i+1;
+			double s=area(p[i],p[j],R);
+			if(cross(o,p[i],p[j])>0) sum+=s;
+			else sum-=s; 
+		}
+		printf("%.2lf\n",fabs(sum));
+	}
+	return 0;
+}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
