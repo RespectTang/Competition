@@ -1,0 +1,261 @@
+/*********************************************************************************************************/
+从最开始的树形数组讲起
+树状数组的讲解：https://blog.csdn.net/flushhip/article/details/79165701
+树状数组的三种模型：https://blog.csdn.net/code12hour/article/details/46597025
+/*********************************************************************************************************/
+例题：Codevs 1228 苹果树
+参考资料：
+https://blog.csdn.net/qq_36693533/article/details/78428470
+https://blog.csdn.net/xu326057825/article/details/53096241
+/*********************************************************************************************************/
+模型：
+/*
+640.树形数组-树的统计 (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+这是数据结构中的树。 结点编号为1,2,...n. 其中1是根结点。 每个结点可涂
+一个颜色白或者黑.操作者可以更改这个颜色。 
+输入描述
+第一行是结点数目n<=100000.接下来的n-1行是连接这n个结点的边ui, vi
+然后的一行是整数m, 表示有m个操作， 接下来的m行就定义了具体操作：
+“C x”意思是改变结点x的颜色
+“Q x”意思是询问结点x为根的子树上有多少个白色结点。
+假设初始时树的所有结点为白色
+输出描述
+每行是依次回答上面的每个Q x
+输入样例
+3
+1 2
+1 3
+3
+Q 1
+C 2
+Q 1
+输出样例
+3
+2
+*/ 
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define MAXN 200010
+using namespace std;
+#define RI register int
+int n,m,ru,rv,tot,pos;
+int limit;//当前最大dfs序
+int first[MAXN],nxt[MAXN];
+int seq[MAXN];//每个点的dfs序
+int c[MAXN];
+char ch;
+struct edge{
+	int u,v;
+}l[MAXN];
+struct point{
+	int ls,rs;//每个点dfs序，以此点为根的子树中最大的dfs序 
+}p[MAXN];//以每个点为根的子树在BIT上的范围
+
+int lowbit(int x)
+{
+	return x&(-x);
+ } 
+void build(int f,int t)
+{
+	l[++tot]=(edge){f,t};
+	nxt[tot]=first[f];
+	first[f]=tot; 
+}
+
+void dfs(int k,int fa)
+{
+	seq[k]=++tot;
+	limit=tot;
+	for(RI i=first[k];i!=-1;i=nxt[i])
+	{
+		int x=l[i].v;
+		if(x!=fa) dfs(x,k);
+	} 
+	p[seq[k]].ls=seq[k];
+	p[seq[k]].rs=limit;
+}
+
+void add(int k,int value)
+{
+	for(int i=k;i<=n;i+=lowbit(i))
+		c[i]+=value;
+}
+
+int ask_sum(int l,int r)
+{
+	int ans=0;
+	for(int i=r;i>0;i-=lowbit(i))
+		ans+=c[i];
+	for(int i=l-1;i>0;i-=lowbit(i))//边界 
+		ans-=c[i];
+	return ans;
+}
+
+int main()
+{
+	memset(first,-1,sizeof(first));
+	cin>>n;
+	for(int i=0;i<n-1;i++)
+	{
+		cin>>ru>>rv;
+		build(ru,rv);
+		build(rv,ru);
+	}
+	tot=0;
+	dfs(1,0);
+	for(int i=1;i<=n;i++)
+		add(i,1);
+	cin>>m;
+	for(int i=0;i<m;i++)
+	{
+		ch=getchar();
+		while(ch!='C'&&ch!='Q')
+			ch=getchar();
+		cin>>pos;
+		if(ch=='C')
+		{
+			if((c[seq[pos]]-ask_sum(seq[pos]-lowbit(seq[pos])+1,seq[pos]-1))==1)//单点查询   
+            //左子树及自身的值之和-ask_sum(左子树第一个元素,左子树最后一个元素)
+            //或者写if(ask_sum(seq[pos],seq[pos])==1)
+            add(seq[pos],-1);
+            else add(seq[pos],1);
+		}
+		if(ch=='Q')
+		{
+			cout<<ask_sum(p[seq[pos]].ls,p[seq[pos]].rs)<<endl;
+		}
+	}
+		
+	return 0;
+}
+
+/*
+线段树解法
+
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<cmath>
+#define RI register int
+using namespace std;
+int n,m,ru,rv,tot,pos;
+int limt;//当前最大dfs序 
+int first[200010],nxt[200010];
+int seq[100010];//每个点的dfs序 
+char ch;
+struct edge
+{
+    int u,v;
+}l[200010];
+struct inte
+{
+    int l,r,A;
+}tree[400010];
+struct point
+{
+    int ls,rs;//每个点dfs序,以此点为根的子树中最大的dfs序 
+}p[100010];//以每个点为根的子树在seg上的范围 
+void add(int f,int t)
+{
+    l[++tot]=(edge){f,t};
+    nxt[tot]=first[f];
+    first[f]=tot;
+}
+void dfs(int k,int fa)
+{
+    seq[k]=++tot;
+    limt=tot;
+    for(RI i=first[k];i!=-1;i=nxt[i])
+    {
+        int x=l[i].v;
+        if(x!=fa)
+        dfs(x,k);
+    }
+    p[seq[k]].ls=seq[k];
+    p[seq[k]].rs=limt;
+}
+void update(int now)
+{
+    tree[now].A=tree[now<<1].A+tree[now<<1|1].A;
+}
+void build(int now,int l,int r)
+{
+    tree[now].l=l;
+    tree[now].r=r;
+    if(l==r)
+    {
+        tree[now].A=1;
+        return;
+    }
+    int mid=(l+r)>>1;
+    build(now<<1,l,mid);
+    build(now<<1|1,mid+1,r);
+    update(now);
+}
+void point_change(int now,int pos)
+{
+    if(tree[now].l==tree[now].r)
+    {
+        tree[now].A=tree[now].A^1;
+        return;
+    }
+    int mid=(tree[now].l+tree[now].r)>>1;
+    if(pos<=mid)
+    point_change(now<<1,pos);
+    if(pos>mid)
+    point_change(now<<1|1,pos);
+    update(now);
+}
+int ask_sum(int now,int l,int r)
+{
+    if(tree[now].l>=l&&tree[now].r<=r)
+    {
+        return tree[now].A;
+    }
+    int ans=0;
+    int mid=(tree[now].l+tree[now].r)>>1;
+    if(l<=mid)
+    ans+=ask_sum(now<<1,l,r);
+    if(r>mid)
+    ans+=ask_sum(now<<1|1,l,r);
+    return ans;
+}
+int main()
+{
+    memset(first,-1,sizeof(first));
+    scanf("%d",&n);
+    for(RI i=1;i<=n-1;i++)//别再错了这是颗n-1条边 
+    {
+        scanf("%d%d",&ru,&rv);
+        add(ru,rv);
+        add(rv,ru);
+    }
+    tot=0; 
+    dfs(1,0);
+    build(1,1,n);
+    scanf("%d",&m);
+    for(RI i=1;i<=m;i++)
+    {
+        ch=getchar();
+        while(ch!='C'&&ch!='Q')
+        ch=getchar();
+        scanf("%d",&pos);
+        if(ch=='C')
+        {
+            point_change(1,seq[pos]);//线段树上的对应位置为其dfs序 
+        }
+        if(ch=='Q')
+        {
+            printf("%d\n",ask_sum(1,p[seq[pos]].ls,p[seq[pos]].rs));
+        }
+    }
+    return 0;
+} 
+*/
+/*********************************************************************************************************/
+/*********************************************************************************************************/
