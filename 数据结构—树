@@ -264,8 +264,138 @@ int main()
 线段树科普：https://www.cnblogs.com/TenosDoIt/p/3453089.html
 /*********************************************************************************************************/
 例题：POJ 2528 贴海报问题
-
+参考资料：
+https://blog.csdn.net/acvay/article/details/45115469
+https://blog.csdn.net/lsgqjh/article/details/47396949
+https://blog.csdn.net/zizahn/article/details/52555321
 /*********************************************************************************************************/
+模板code
+/*
+639.线段树-贴海报 (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+由10^7块1x1的玻璃构成1x10^7的海报墙，每个海报完整地覆盖几块玻璃，海报的宽度可以不同。后来的人可以覆盖
+前人的海报。一张海报如果有没被覆盖的部分，则称为可视海报。你的任务是找出有多少可视海报。
+输入描述
+第一行是测试的总数c，接下来的行是各测试用例。
+每个测试的第一行是海报的总数n, n<=10000， 然后是n个按先后顺序贴的海报的位置li, ri. 满足1<=li<=ri<=10^7。
+输出描述
+每个测试的可视海报数目
+输入样例
+1
+5
+1 4
+2 6
+8 10
+3 4
+7 10
+输出样例
+4
+*/
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cstring>
+using namespace std;
 
+const int MAXN=100005;
+bool hash[MAXN];
+int li[MAXN],ri[MAXN];
+int cov[MAXN<<4];
+int a[MAXN*3];
+int cnt;
+
+int BinSea(int key,int n)//二分查找所在编号，就是离散后的位置号
+{
+	int l=0,r=n-1;
+	while(l<=r)
+	{
+		int mid=(l+r)/2;
+		if(a[mid]==key) return mid;
+		else if(a[mid]<key) l=mid+1;
+		else r=mid-1;
+	}
+	return -1;
+} 
+
+void Pushdown(int p)//将该区间的标记向子女节点传递
+{
+	if(cov[p]!=-1)
+	{
+		cov[p<<1]=cov[p<<1|1]=cov[p];
+		cov[p]=-1;
+	}
+} 
+
+void Update(int p,int l,int r,int x,int y,int c)
+{
+	if(x<=l&&y>=r)
+	{
+		cov[p]=c;
+		return;
+	}
+	Pushdown(p);
+	int mid=(l+r)/2;
+	if(x<=mid) Update(p<<1,l,mid,x,y,c);
+	if(y>mid) Update(p<<1|1,mid+1,r,x,y,c);
+}
+
+void Query(int p,int l,int r)//遍历每个区间的颜色 
+{
+	if(cov[p]!=-1)
+	{
+		if(!hash[cov[p]])
+		{
+			cnt++;
+			hash[cov[p]]=true;
+		}
+		return;
+	} 
+	if(l==r) return;
+	int mid=(l+r)/2;
+	Query(p<<1,l,mid);
+	Query(p<<1|1,mid+1,r);
+}
+
+int main()
+{
+	int T,n;
+	cin>>T;
+	while(T--)
+	{
+		cin>>n;
+		int k=0;
+		for(int i=0;i<n;i++)
+		{
+			cin>>li[i]>>ri[i];
+			a[k++]=li[i];
+			a[k++]=ri[i];
+		}
+		sort(a,a+k);//排序便于离散化 
+		int h=1;
+		for(int i=1;i<k;i++)//删去相同的数 
+		{
+			if(a[i]!=a[i-1])
+				a[h++]=a[i]; 
+		}
+		for(int i=h-1;i>0;i--)//距离大于1之间的点要加一个数 
+		{
+			if(a[i]-a[i-1]>1)
+				a[h++]=a[i-1]+1; 
+		}
+		sort(a,a+h);
+		memset(cov,-1,sizeof(cov));
+		for(int i=0;i<n;i++)
+		{
+			int l=BinSea(li[i],h);
+			int r=BinSea(ri[i],h);
+			Update(1,0,h-1,l,r,i);
+		}
+		cnt=0;
+		memset(hash,0,sizeof(hash));
+		Query(1,0,h-1);
+		cout<<cnt<<endl;
+	}
+}
 /*********************************************************************************************************/
 /*********************************************************************************************************/
