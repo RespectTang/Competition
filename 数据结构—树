@@ -399,3 +399,157 @@ int main()
 }
 /*********************************************************************************************************/
 /*********************************************************************************************************/
+然后是前缀树，也就是字典树，Trie树
+前缀树理解起来比其他树要简单很多
+参考资料：https://blog.csdn.net/cyongxue/article/details/19603401
+/*********************************************************************************************************/
+一道入门的模板题，字符串匹配
+参考资料：
+https://blog.csdn.net/huatian5/article/details/52191352
+https://blog.csdn.net/qq_34446253/article/details/52039974
+/*********************************************************************************************************/
+code：
+/*
+642.前缀树-串查找 (10分) 
+C时间限制：1000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+给N个模式串，每个不超过500个字符，再给M个句子串，句子长度<=10000, 判断每个句子里是否包含模式串.
+N<=100,M<=100 ,字符都是小写字母
+输入描述
+第一行是N, M. 随后N行模式串，以及M行句子
+
+输出描述
+每个句子的判断结果，如果句子包含某个串则输出1，否则输出0
+
+输入样例
+5 8
+abcde
+defg
+cdke
+ab
+f
+abcdkef
+abkef
+bcd
+bca
+add
+ab
+qab
+f
+
+输出样例
+1
+1
+0
+0
+0
+1
+1
+1
+*/ 
+#include<iostream>
+#include<queue>
+#include<algorithm>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+
+const int MAXN=105;
+const int letters=26;
+int nNode;
+struct CNode{
+	CNode *pChilds[letters];
+	CNode *pPrev;
+	bool bBadNode;
+	void Init(){
+		memset(pChilds,0,sizeof(pChilds));
+		bBadNode=false;
+		pPrev=NULL;
+	} 
+}tree[200];
+
+void BuildDfa()
+{
+	for(int i=0;i<letters;i++)
+		tree[0].pChilds[i]=tree+1;
+	tree[1].pPrev=tree;
+	tree[0].pPrev=NULL;
+	queue<CNode*> Q;
+	Q.push(tree+1);
+	while(!Q.empty())
+	{
+		CNode *root=Q.front();
+		Q.pop();
+		for(int i=0;i<letters;i++)
+		{
+			CNode *p=root->pChilds[i];
+			if(p==NULL) continue;
+			CNode *pPrev=root->pPrev;
+			while(pPrev)
+			{
+				if(pPrev->pChilds[i]!=NULL)
+				{
+					p->pPrev=pPrev->pChilds[i];
+					if(p->pPrev->bBadNode)
+						p->bBadNode=true;
+					break;
+				}
+				else pPrev=pPrev->pPrev;
+			}
+			Q.push(p);
+		}
+	}
+}
+
+bool SearchDfa(char *s)
+{
+	CNode *p=tree+1;
+	for(int i=0;s[i];i++)
+	{
+		for(;;)
+		{
+			if(p->pChilds[s[i]-'a']!=NULL)
+			{
+				p=p->pChilds[s[i]-'a'];
+				if(p->bBadNode) return true;//遇到危险节点或者终止节点 
+				break;
+			}
+			else p=p->pPrev; //回到前驱节点
+		}
+	}
+	return false;
+}
+
+void  Insert(CNode *root,char *s)
+{
+	for(int i=0;s[i];i++)
+	{
+		if(root->pChilds[s[i]-'a']==NULL)
+			root->pChilds[s[i]-'a']=tree+nNode++;
+		root=root->pChilds[s[i]-'a'];
+	}
+	root->bBadNode=true;
+}
+
+int main()
+{
+	int N,M;
+	cin>>N>>M;
+	nNode=2;
+	char s[200];
+	for(int i=0;i<N;i++)
+	{
+		scanf("%s",s);
+		Insert(tree+1,s);
+	}
+	BuildDfa();
+	for(int i=0;i<M;i++)
+	{
+		scanf("%s",s);
+		cout<<SearchDfa(s)<<endl;
+	}
+	return 0;
+}
+
+/*********************************************************************************************************/
+/*********************************************************************************************************/
