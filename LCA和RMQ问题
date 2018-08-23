@@ -1,0 +1,90 @@
+综述：
+http://dongxicheng.org/structure/lca-rmq/
+LCA详解：
+https://blog.csdn.net/u014679804/article/details/48000523
+https://blog.csdn.net/qq_32400847/article/details/51543088
+
+RMQ例题：
+HDU 3813 神灯问题
+参考资料：
+https://blog.csdn.net/wlxsq/article/details/47273349
+/*******************************************************************************************************************************/
+code:
+/*
+1443.RMQ问题- 神灯 (10分) 
+C时间限制：1000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+从一个n位数字的整数中删除m位数字，要求余下的数字在不改变顺序的情况下，表示的值最小。
+请神灯帮你。
+ 输入描述
+整数n m, 可能有多个测试用例。 n<=1000
+输出描述
+余下的整数数。如果整数前面是0，不用输出.
+输入样例
+178543 4 1000001 1 100001 2 12345 2 54321 2
+输出样例
+13 1 0 123 321
+*/
+#include<iostream>
+#include<algorithm>
+#include<cstring>
+#include<cmath>
+#include<cstdio>
+using namespace std;
+#define INF 1<<30
+const int N=1035;
+
+int n,m;
+int dp[N][25];//注意这里一定是int不是char！！！ 
+char s1[N];
+char ans[N];
+
+int Min(int a,int b)//返回下标的比较 
+{
+	return s1[a]<=s1[b]?a:b;
+} 
+
+void make_rmq()
+{
+	for(int i=0;i<n;i++)//长度为0的初始值 
+		dp[i][0]=i;
+	for(int j=1;(1<<j)<n;j++)
+	{
+		for(int i=0;i+(1<<j)-1<n;i++)
+		{
+			dp[i][j]=Min(dp[i][j-1],dp[i+(1<<j-1)][j-1]);
+		}
+	}
+} 
+
+int query_rmq(int s,int v)//查询rmq 
+{
+	int k=(int)((log((v-s+1)*1.0))/(log(2.0)));//对数换底公式，求k的长度 
+	return Min(dp[s][k],dp[v-(1<<k)+1][k]);
+}
+
+int main()
+{
+	while(~scanf("%s %d",s1,&m))
+	{
+		n=strlen(s1);//存储字符串的长度 
+		make_rmq();
+		int t=n-m;//要输出的长度
+		int q=0,p=0;
+		while(t--)
+		{
+			q=query_rmq(q,m++);//（划重点！！！）查询从下标q开始下标为m的最小值 
+			ans[p++]=s1[q++]; 
+		} 
+		for(q=0;q<p;q++)
+			if(ans[q]!='0')
+				break;
+		if(p==q) printf("0");
+		else while(q<p) printf("%c",ans[q++]);
+		printf("\n");
+	}
+	return 0;
+} 
+/*******************************************************************************************************************************/
+/*******************************************************************************************************************************/
+/*******************************************************************************************************************************/
