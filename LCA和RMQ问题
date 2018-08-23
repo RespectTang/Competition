@@ -86,5 +86,170 @@ int main()
 	return 0;
 } 
 /*******************************************************************************************************************************/
+LCA
+LCA的在线做法是转化成RMQ的模板，离线做法目前还不怎么会
+大概问题就是找最近的祖先节点的问题
 /*******************************************************************************************************************************/
+题目 HDU 2586
+参考资料：
+https://blog.csdn.net/lvshubao1314/article/details/44001481
+https://blog.csdn.net/yangrui2002/article/details/76636317?locationNum=8&fps=1
 /*******************************************************************************************************************************/
+code
+/*
+1444.LCA问题-就是模板题 (10分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+村里有n座房子，房子之间有路。已知任何两个房子之间只有一条路径。有人会经常问张三和李四家多远这样的问题。 
+输入描述
+第一行T(T<=10),表示测试用例数目.
+对每个测试用例，第一行是 n(2<=n<=40000) and m (1<=m<=200),分别是房子数目和询问数目。
+随后是n-1行三元组 i,j,k, , 表示房子i和j之间的有路,长度是k(0<k<=40000).房子编号是1 到 n.
+接下来的m行，每行是两个数a,b，表示要问房子a和b之间有多远。
+输出描述
+每个测试用例输出m行，是对查询的回答。不同的测试用例之间加一空行. 
+输入样例
+2
+3 2
+1 2 10
+3 1 15
+1 2
+2 3
+2 2
+1 2 100
+1 2
+2 1
+输出样例
+10
+25
+100
+100
+*/
+#include<iostream>
+#include<cmath>
+#include<cstring>
+#include<algorithm>
+#include<cstdlib>
+using namespace std;
+const int maxn=40010;
+const int maxm=25;
+
+int _pow[maxm],m,n;
+int head[maxn],ip;
+int ver[maxn*2],R[maxn*2],first[maxn],dir[maxn],dp[maxn*2][maxm],tot;
+bool vis[maxn];
+
+struct node{
+	int v,w,next;
+}edge[maxn*2];
+
+void init()
+{
+	memset(vis,false,sizeof(vis));
+	memset(head,-1,sizeof(head));
+	ip=0;
+}
+
+void addedge(int u,int v,int w)
+{
+	edge[ip].v=v;
+	edge[ip].w=w;
+	edge[ip].next=head[u];
+	head[u]=ip++;	
+}
+
+void dfs(int u,int dep)
+{
+	vis[u]=true;
+	ver[++tot]=u;
+	first[u]=tot;
+	R[tot]=dep;
+	for(int i=head[u];i!=-1;i=edge[i].next)
+	{
+		int v=edge[i].v;
+		int w=edge[i].w;
+		if(!vis[v])
+		{
+			dir[v]=dir[u]+w;
+			dfs(v,dep+1);
+			ver[++tot]=u;
+			R[tot]=dep;
+		}
+	}
+}
+
+
+void ST(int len)
+{
+	int k=(int)log((double)len)/(log(2.0));
+	for(int i=1;i<=len;i++)
+	{
+		dp[i][0]=i;
+	}
+	for(int j=1;j<=k;j++)
+	{
+		for(int i=1;i+_pow[j]-1<=len;i++)
+		{
+			int a=dp[i][j-1];
+			int b=dp[i+_pow[j-1]][j-1];
+			if(R[a]<R[b])
+				dp[i][j]=a;
+			else dp[i][j]=b;
+		}
+	}
+}
+
+int RMQ(int x,int y)
+{
+	int k=(int)log((double)(y-x+1)/log(2.0));
+	int a=dp[x][k];
+	int b=dp[y-_pow[k]+1][k];
+	if(R[a]<R[b])
+		return a;
+	else return b;
+}
+
+int LCA(int u,int v)
+{
+	int x=first[u];
+	int y=first[v];
+	if(x>y) swap(x,y);
+	int res=RMQ(x,y);
+	return ver[res];
+}
+
+int main()
+{
+	for(int i=0;i<maxn;i++)
+		_pow[i]=(1<<i);
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%d%d",&n,&m);
+		init();
+		for(int i=1;i<n;i++)
+		{
+			int u,v,w;
+			scanf("%d%d%d",&u,&v,&w);
+			addedge(u,v,w);
+			addedge(v,u,w);
+		}
+		tot=0;
+		dir[1]=0;
+		dfs(1,1);
+		ST(2*n-1);
+		while(m--)
+		{
+			int u,v;
+			scanf("%d%d",&u,&v);
+			int lca=LCA(u,v);
+			printf("%d\n",dir[u]+dir[v]-2*dir[lca]);
+		}
+	}
+	
+	return 0;
+}
+
+
+
