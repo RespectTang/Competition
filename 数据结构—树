@@ -552,4 +552,120 @@ int main()
 }
 
 /*********************************************************************************************************/
+存一个可以提交的代码
+/*642.前缀树-串查找 (10分)
+C时间限制：1000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+给N个模式串，每个不超过500个字符，再给M个句子串，句子长度<=10000, 判断每个句子里是否包含模式串.
+N<=100,M<=100 ,字符都是小写字母
+输入描述
+第一行是N, M. 随后N行模式串，以及M行句子
+输出描述
+每个句子的判断结果，如果句子包含某个串则输出1，否则输出0
+输入样例
+5 8
+abcde
+defg
+cdke
+ab
+f
+abcdkef
+abkef
+bcd
+bca
+add
+ab
+qab
+f
+输出样例
+1
+1
+0
+0
+0
+1
+1
+1
+程序代码*/
+#include<iostream>
+#include<cstring>
+#include<string>
+using namespace std;
+const int maxn=26;
+class Trie{
+	public:
+		bool isStr;
+		Trie *next[maxn];
+		
+		Trie(){
+			isStr=false;
+			for(int i=0;i<maxn;i++){
+				next[i]=NULL;
+			}
+		}
+		void insert(Trie *root,string str);
+		bool serach(Trie *root,string str);
+};
+void Trie::insert(Trie *root,string str)
+{
+	int n=str.size();
+	Trie *p=root;
+	for(int i=0;i<n;i++){
+		if(p->next[str[i]-'a']==NULL){
+			Trie *newnode=new Trie;
+			p->next[str[i]-'a']=newnode;
+		}
+		p=p->next[str[i]-'a'];
+	}
+	p->isStr=true;
+	
+}
+bool Trie::serach(Trie *root,string str){
+	Trie *p=root;
+	Trie *q=root;
+	int n=str.size();
+	for(int i=0;i<n;i++){
+		p=q;
+		for(int j=i;j<n;j++){
+			if(p->next[str[j]-'a']!=NULL){
+				p=p->next[str[j]-'a'];
+				if(p->isStr==true)
+				return 1;
+
+			}
+			else
+			break;
+		}
+	}
+	return 0;
+}
+int main()
+{
+	int n,m;
+	string a[100],b[100];
+	cin>>n>>m;
+	getchar();
+	for(int i=0;i<n;i++)
+	cin>>a[i];
+	for(int i=0;i<m;i++)
+	cin>>b[i];
+
+/*	for(int i=0;i<n;i++)
+	cout<<a[i]<<endl;
+	for(int i=0;i<m;i++)
+	cout<<b[i]<<endl;*/
+	Trie *root=new Trie;
+	for(int i=0;i<n;i++)
+	root->insert(root,a[i]);
+	
+	for(int i=0;i<m;i++){
+		if(root->serach(root,b[i]))
+		cout<<"1"<<endl;
+		else
+		cout<<0<<endl;
+	}
+	
+	return 0;
+}
+
 /*********************************************************************************************************/
