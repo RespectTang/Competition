@@ -1,7 +1,11 @@
 /***************************************************************************************************************************/
-
+高斯消元的hint：
+模板：https://blog.csdn.net/so_so_y/article/details/76431559
+一些推论和证明：https://www.cnblogs.com/Dumblidor/p/5751579.html
 /*
  646.高斯消元-平方数 (10分) 
+ 原题：UVA 11542
+ hint：https://blog.csdn.net/yeyeyeguoguo/article/details/47253571
 C时间限制：3000 毫秒 |  C内存限制：3000 Kb
 题目内容：
 n个整数a1,a2,...an，每个数ai的质因子不超过2000. 现从中选取一些数，
@@ -43,7 +47,7 @@ inline int lcm(int a,int b)
 	return a/gcd(a,b)*b;
 }
 
-int Gauss(int equ,int var)
+int Gauss(int equ,int var)//高斯消元求变元个数，也就是求秩
 {
 	int i,j,k;
 	int max_r;
@@ -151,6 +155,8 @@ int main()
 
 /***************************************************************************************************************************/
 /*
+高斯消元求解异或方程组：开关灯问题末班https://www.cnblogs.com/titicia/p/5396997.html
+开关问题的详解：https://blog.csdn.net/zhuichao001/article/details/5440843
 1467.高斯消元-Lanterns (10分) 
 C时间限制：3000 毫秒 |  C内存限制：3000 Kb
 题目内容：
@@ -227,7 +233,7 @@ using namespace std;
 int a[MAXN][MAXN];
 int b[MAXN][MAXN];
  
-int Gauss(int n,int m)
+int Gauss(int n,int m)//高斯消元求变元个数
 {
 	int col=0;
 	int max_r;
