@@ -1,0 +1,132 @@
+除法取模运算
+推论证明与详解：https://blog.csdn.net/u011523762/article/details/52134807
+
+模板
+
+#include <iostream>
+
+#include <cstdio>
+
+#include <cstring>
+
+typedef long long ll;
+
+#define mod 9973
+
+using namespace std;
+
+//扩展欧几里德 求出a%b的逆元
+
+ll extgcd(ll a,ll b,ll &x, ll &y) {
+
+    ll d=a;
+
+    if(b!=0) {
+
+        d=extgcd(b,a%b,y,x);
+
+        y-=(a/b)*x;
+
+    } else {
+
+        x=1;
+
+        y=0;
+
+    }
+
+    return d;
+
+}
+
+// 逆元取模
+
+ll inv(ll a,ll M) {
+
+    ll x,y;
+
+    extgcd(a,M,x,y);
+
+    return (x%M+M)%M;
+
+}
+
+//欧拉公式，求出phi(n)，就是1-n中与N互素的个数；
+
+ll euler_phi(ll n) {
+
+    int res=n;
+
+    for(int i=2; i*i<=n; i++) {
+
+        if(n%i==0) {
+
+            res=res/i*(i-1);
+
+            for(; n%i==0; n/=i);
+
+        }
+
+    }
+
+    if(n!=1) res=res/n*(n-1);
+
+    return res;
+
+}
+
+ll pow(ll a,ll b) {
+
+    ll res=1;
+
+    while(b>0) {
+
+        if(b&1) res=res*a%mod;
+
+        a=a*a%mod;
+
+        b>>=1;
+
+    }
+
+    return res;
+
+}
+
+ 
+
+int main() {
+
+    int T;
+
+    ll n,b;
+
+    cin >> T;
+
+    while(T--) {
+
+        scanf("%lld%lld",&n,&b);
+
+        ll ans=0;
+
+        //逆元取模
+
+        /*ans=n*inv(b,mod)%mod;
+
+        printf("%lld\n",ans);*/
+
+        b=b%mod;
+
+        //欧拉公式加快速幂取模  x=A/B(mod n)可转化为A*B^(phi(n)-1)mod n
+
+        ll mm=euler_phi(mod);
+
+        ans=n*pow(b,mm-1)%mod;
+
+        printf("%lld\n",ans);
+
+ 
+
+    }
+
+}
